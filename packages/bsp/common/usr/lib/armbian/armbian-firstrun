@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) Authors: http://www.armbian.com/authors
+# Copyright (c) Authors: https://www.armbian.com/authors
 #
 # This file is licensed under the terms of the GNU General Public
 # License version 2. This program is licensed "as is" without any
@@ -125,7 +125,7 @@ case "$1" in
 	esac
 
 	# varios temporary hardware workarounds
-	[[ $LINUXFAMILY == rk3399 || $LINUXFAMILY == rockchip64 ]] && [[ $BOARD != helios64 ]] && set_fixed_mac
+	[[ $LINUXFAMILY == rk3399 || $LINUXFAMILY == rockchip64 ]] && [[ $BOARD != helios64 && $BOARD != khadas-edge ]] && set_fixed_mac
 	[[ $BRANCH == dev && $LINUXFAMILY == rockchip ]] && set_fixed_mac
 	[[ $BRANCH == current && $LINUXFAMILY == odroidc1 ]] && set_fixed_mac
 	[[ $LINUXFAMILY == meson64 ]] && set_fixed_mac

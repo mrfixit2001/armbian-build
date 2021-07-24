@@ -1,18 +1,23 @@
 #!/bin/bash
 #
-# Copyright (c) 2015 Igor Pecovnik, igor.pecovnik@gma**.com
+# Copyright (c) 2013-2021 Igor Pecovnik, igor.pecovnik@gma**.com
 #
 # This file is licensed under the terms of the GNU General Public
 # License version 2. This program is licensed "as is" without any
 # warranty of any kind, whether express or implied.
-
+#
 # This file is a part of the Armbian build script
 # https://github.com/armbian/build/
+
 # Functions:
+
 # install_common
 # install_rclocal
 # install_distribution_specific
 # post_debootstrap_tweaks
+
+
+
 
 install_common()
 {
@@ -300,7 +305,8 @@ install_common()
 	# install armbian-desktop
 	if [[ "${REPOSITORY_INSTALL}" != *armbian-desktop* ]]; then
 		if [[ $BUILD_DESKTOP == yes ]]; then
-			install_deb_chroot "${DEB_STORAGE}/$RELEASE/${CHOSEN_DESKTOP}_${REVISION}_all.deb"
+			install_deb_chroot "${DEB_STORAGE}/${RELEASE}/${CHOSEN_DESKTOP}_${REVISION}_all.deb"
+			install_deb_chroot "${DEB_STORAGE}/${RELEASE}/${BSP_DESKTOP_PACKAGE_FULLNAME}.deb"
 			# install display manager and PACKAGE_LIST_DESKTOP_FULL packages if enabled per board
 			desktop_postinstall
 		fi
@@ -387,7 +393,7 @@ install_common()
 
 	# switch to beta repository at this stage if building nightly images
 	[[ $IMAGE_TYPE == nightly ]] \
-	&& echo "deb http://beta.armbian.com $RELEASE main ${RELEASE}-utils ${RELEASE}-desktop" \
+	&& echo "deb https://beta.armbian.com $RELEASE main ${RELEASE}-utils ${RELEASE}-desktop" \
 	> "${SDCARD}"/etc/apt/sources.list.d/armbian.list
 
 	# Cosmetic fix [FAILED] Failed to start Set console font and keymap at first boot
@@ -601,7 +607,7 @@ install_distribution_specific()
 			sed '/security/ d' -i "${SDCARD}"/etc/apt/sources.list
 
 		;;
-	bionic|groovy|focal|hirsute)
+	bionic|focal|hirsute|impish)
 
 			# by using default lz4 initrd compression leads to corruption, go back to proven method
 			sed -i "s/^COMPRESS=.*/COMPRESS=gzip/" "${SDCARD}"/etc/initramfs-tools/initramfs.conf
@@ -610,14 +616,7 @@ install_distribution_specific()
 			chroot "${SDCARD}" /bin/bash -c "systemctl disable  motd-news.service >/dev/null 2>&1"
 			chroot "${SDCARD}" /bin/bash -c "systemctl disable  motd-news.timer >/dev/null 2>&1"
 
-			rm -f "${SDCARD}"/etc/update-motd.d/10-uname
-			rm -f "${SDCARD}"/etc/update-motd.d/10-help-text
-			rm -f "${SDCARD}"/etc/update-motd.d/50-motd-news
-			rm -f "${SDCARD}"/etc/update-motd.d/80-esm
-			rm -f "${SDCARD}"/etc/update-motd.d/80-livepatch
-			rm -f "${SDCARD}"/etc/update-motd.d/90-updates-available
-			rm -f "${SDCARD}"/etc/update-motd.d/91-release-upgrade
-			rm -f "${SDCARD}"/etc/update-motd.d/95-hwe-eol
+			rm -f "${SDCARD}"/etc/update-motd.d/{10-uname,10-help-text,50-motd-news,80-esm,80-livepatch,90-updates-available,91-release-upgrade,95-hwe-eol}
 
 			# remove motd news from motd.ubuntu.com
 			[[ -f "${SDCARD}"/etc/default/motd-news ]] && sed -i "s/^ENABLED=.*/ENABLED=0/" "${SDCARD}"/etc/default/motd-news

@@ -143,7 +143,7 @@ get_package_list_hash()
 
 # create_sources_list <release> <basedir>
 #
-# <release>: stretch|buster|bullseye|xenial|bionic|groovy|focal|groovy|hirsute|sid
+# <release>: buster|bullseye|bionic|focal|hirsute|sid
 # <basedir>: path to root directory
 #
 create_sources_list()
@@ -169,7 +169,7 @@ create_sources_list()
 	EOF
 	;;
 
-	xenial|bionic|groovy|focal|groovy|hirsute)
+	xenial|bionic|focal|hirsute)
 	cat <<-EOF > "${basedir}"/etc/apt/sources.list
 	deb http://${UBUNTU_MIRROR} $release main restricted universe multiverse
 	#deb-src http://${UBUNTU_MIRROR} $release main restricted universe multiverse
@@ -188,7 +188,7 @@ create_sources_list()
 
 	# stage: add armbian repository and install key
 	if [[ $DOWNLOAD_MIRROR == "china" ]]; then
-		echo "deb http://mirrors.tuna.tsinghua.edu.cn/armbian $RELEASE main ${RELEASE}-utils ${RELEASE}-desktop" > "${SDCARD}"/etc/apt/sources.list.d/armbian.list
+		echo "deb https://mirrors.tuna.tsinghua.edu.cn/armbian $RELEASE main ${RELEASE}-utils ${RELEASE}-desktop" > "${SDCARD}"/etc/apt/sources.list.d/armbian.list
 	elif [[ $DOWNLOAD_MIRROR == "bfsu" ]]; then
 	    echo "deb http://mirrors.bfsu.edu.cn/armbian $RELEASE main ${RELEASE}-utils ${RELEASE}-desktop" > "${SDCARD}"/etc/apt/sources.list.d/armbian.list
 	else
@@ -446,7 +446,6 @@ display_alert()
 #--------------------------------------------------------------------------------------------------------------------------------
 fingerprint_image()
 {
-	display_alert "Fingerprinting"
 	cat <<-EOF > "${1}"
 	--------------------------------------------------------------------------------
 	Title:			${VENDOR} $REVISION ${BOARD^} $DISTRIBUTION $RELEASE $BRANCH
@@ -807,15 +806,26 @@ addtorepo()
 
 
 
-repo-manipulate() {
-	local DISTROS=("xenial" "stretch" "bionic" "buster" "bullseye" "groovy" "focal" "hirsute" "sid")
+repo-manipulate()
+{
+# repository manipulation
+# "show" displays packages in each repository
+# "server" serve repository - useful for local diagnostics
+# "unique" manually select which package should be removed from all repositories
+# "update" search for new files in output/debs* to add them to repository
+# "purge" leave only last 5 versions
+
+	local DISTROS=($(grep -rw config/distributions/*/ -e 'supported' | cut -d"/" -f3))
+
 	case $@ in
+
 		serve)
 			# display repository content
 			display_alert "Serving content" "common utils" "ext"
 			aptly serve -listen=$(ip -f inet addr | grep -Po 'inet \K[\d.]+' | grep -v 127.0.0.1 | head -1):80 -config="${SCRIPTPATH}config/${REPO_CONFIG}"
 			exit 0
 			;;
+
 		show)
 			# display repository content
 			for release in "${DISTROS[@]}"; do
@@ -830,6 +840,7 @@ repo-manipulate() {
 			;;
 
 		unique)
+			# which package should be removed from all repositories
 			IFS=$'\n'
 			while true; do
 				LIST=()
@@ -849,7 +860,7 @@ repo-manipulate() {
 				LIST=("${new_list[@]}")
 				LIST_LENGTH=$((${#LIST[@]}/2));
 				exec 3>&1
-				TARGET_VERSION=$(dialog --cancel-label "Cancel" --backtitle "BACKTITLE" --no-collapse --title "Switch from and reboot" --clear --menu "Delete" $((9+${LIST_LENGTH})) 82 65 "${LIST[@]}" 2>&1 1>&3)
+				TARGET_VERSION=$(dialog --cancel-label "Cancel" --backtitle "BACKTITLE" --no-collapse --title "Remove packages from repositories" --clear --menu "Delete" $((9+${LIST_LENGTH})) 82 65 "${LIST[@]}" 2>&1 1>&3)
 				exitstatus=$?;
 				exec 3>&-
 				if [[ $exitstatus -eq 0 ]]; then
@@ -861,8 +872,10 @@ repo-manipulate() {
 				else
 					exit 1
 				fi
+				aptly db cleanup -config="${SCRIPTPATH}config/${REPO_CONFIG}" > /dev/null 2>&1
 			done
 			;;
+
 		update)
 			# display full help test
 			# run repository update
@@ -871,6 +884,7 @@ repo-manipulate() {
 			cp "${SCRIPTPATH}"config/armbian.key "${REPO_STORAGE}"/public/
 			exit 0
 			;;
+
 		purge)
 			for release in "${DISTROS[@]}"; do
 				repo-remove-old-packages "$release" "armhf" "5"
@@ -880,6 +894,7 @@ repo-manipulate() {
 			done
 			exit 0
 			;;
+
 		purgesource)
 			for release in "${DISTROS[@]}"; do
 				aptly repo remove -config="${SCRIPTPATH}config/${REPO_CONFIG}" "${release}" 'Name (% *-source*)'
@@ -889,15 +904,20 @@ repo-manipulate() {
 			exit 0
 			;;
 		*)
-			echo -e "Usage: repository show | serve | create | update | purge\n"
-			echo -e "\n show   = display repository content"
-			echo -e "\n serve  = publish your repositories on current server over HTTP"
-			echo -e "\n update = updating repository"
-			echo -e "\n purge  = removes all but last 5 versions\n\n"
+
+			echo -e "Usage: repository show | serve | unique | create | update | purge | purgesource\n"
+			echo -e "\n show           = display repository content"
+			echo -e "\n serve          = publish your repositories on current server over HTTP"
+			echo -e "\n unique         = manually select which package should be removed from all repositories"
+			echo -e "\n update         = updating repository"
+			echo -e "\n purge          = removes all but last 5 versions"
+			echo -e "\n purgesource    = removes all sources\n\n"
 			exit 0
 			;;
+
 	esac
-} # ParseOptions
+
+}
 
 
 
@@ -917,11 +937,8 @@ repo-remove-old-packages() {
 		pkg_name=$(echo "${pkg}" | cut -d_ -f1)
 		for subpkg in $(aptly repo search -config="${SCRIPTPATH}config/${REPO_CONFIG}" "${repo}" "Name ($pkg_name)"  | grep -v "ERROR: no results" | sort -rt '.' -nk4); do
 			((count+=1))
-#			echo $subpkg
 			if [[ $count -gt $keep ]]; then
-			#echo "rem"
 			pkg_version=$(echo "${subpkg}" | cut -d_ -f2)
-			#echo $pkg_version
 			aptly repo remove -config="${SCRIPTPATH}config/${REPO_CONFIG}" "${repo}" "Name ($pkg_name), Version (= $pkg_version)"
 			fi
 		done
@@ -950,22 +967,26 @@ wait_for_package_manager()
 
 
 
-
 # prepare_host_basic
 #
 # * installs only basic packages
 #
 prepare_host_basic()
 {
-	# wait until package manager finishes possible system maintanace
-	wait_for_package_manager
+	# the checklist includes a list of package names separated by a space
+	local checklist="dialog psmisc acl uuid-runtime curl gnupg gawk"
 
-	# need to install dialog if person is starting with a interactive mode
+	# Don't use this function here.
+	# wait_for_package_manager
+	#
+	# The `psmisk` package is not installed yet.
+
+	# We will check one package and install the entire list.
 	if [[ $(dpkg-query -W -f='${db:Status-Abbrev}\n' dialog 2>/dev/null) != *ii* ]]; then
-		display_alert "Installing package" "dialog"
-		apt-get -q update && apt-get install -q -y --no-install-recommends dialog
+		display_alert "Installing basic packages" "$checklist"
+		apt-get -qq update && \
+		apt-get install -qq -y --no-install-recommends $checklist
 	fi
-
 }
 
 
@@ -992,7 +1013,7 @@ prepare_host()
 
 	if [[ $(dpkg --print-architecture) != amd64 ]]; then
 		display_alert "Please read documentation to set up proper compilation environment"
-		display_alert "http://www.armbian.com/using-armbian-tools/"
+		display_alert "https://www.armbian.com/using-armbian-tools/"
 		exit_with_error "Running this tool on non x86-x64 build host is not supported"
 	fi
 
@@ -1023,18 +1044,20 @@ prepare_host()
   else
 
 	local hostdeps="wget ca-certificates device-tree-compiler pv bc lzop zip binfmt-support build-essential ccache debootstrap ntpdate \
-	gawk gcc-arm-linux-gnueabihf qemu-user-static u-boot-tools uuid-dev zlib1g-dev unzip libusb-1.0-0-dev fakeroot \
+	gawk gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi gcc-arm-none-eabi \
+	qemu-user-static u-boot-tools uuid-dev zlib1g-dev unzip libusb-1.0-0-dev fakeroot \
 	parted pkg-config libncurses5-dev whiptail debian-keyring debian-archive-keyring f2fs-tools libfile-fcntllock-perl rsync libssl-dev \
-	nfs-kernel-server btrfs-progs ncurses-term p7zip-full kmod dosfstools libc6-dev-armhf-cross imagemagick \
+	nfs-kernel-server btrfs-progs ncurses-term p7zip-full kmod dosfstools libc6-amd64-cross libc6-dev-armhf-cross imagemagick \
 	curl patchutils liblz4-tool libpython2.7-dev linux-base swig aptly acl python3-dev \
 	locales ncurses-base pixz dialog systemd-container udev libfdt-dev libc6 qemu \
-	bison libbison-dev flex libfl-dev cryptsetup gpg gnupg1 cpio aria2 pigz dirmngr python3-distutils"
+	bison libbison-dev flex libfl-dev cryptsetup gpg gnupg1 cpio aria2 pigz \
+	dirmngr python3-distutils jq "
 
 # build aarch64
   fi
 
-	# Add support for Ubuntu 20.04, 21.04 and Mint Ulyana
-	if [[ $HOSTRELEASE =~ ^(focal|groovy|hirsute|ulyana|ulyssa|bullseye)$ ]]; then
+	# Add support for Ubuntu 20.04, 21.04 and Mint 20.x
+	if [[ $HOSTRELEASE =~ ^(focal|hirsute|ulyana|ulyssa|bullseye|uma)$ ]]; then
 		hostdeps+=" python2 python3"
 		ln -fs /usr/bin/python2.7 /usr/bin/python2
 		ln -fs /usr/bin/python2.7 /usr/bin/python
@@ -1044,12 +1067,12 @@ prepare_host()
 
 	display_alert "Build host OS release" "${HOSTRELEASE:-(unknown)}" "info"
 
-	# Ubuntu 20.04.x (Focal) x86_64 is the only fully supported host OS release
+	# Ubuntu 21.04.x (Hirsute) x86_64 is the only fully supported host OS release
 	# Using Docker/VirtualBox/Vagrant is the only supported way to run the build script on other Linux distributions
 	#
 	# NO_HOST_RELEASE_CHECK overrides the check for a supported host system
 	# Disable host OS check at your own risk. Any issues reported with unsupported releases will be closed without discussion
-	if [[ -z $HOSTRELEASE || "buster bullseye groovy focal hirsute debbie tricia ulyana ulyssa" != *"$HOSTRELEASE"* ]]; then
+	if [[ -z $HOSTRELEASE || "buster bullseye focal hirsute debbie tricia ulyana ulyssa uma" != *"$HOSTRELEASE"* ]]; then
 		if [[ $NO_HOST_RELEASE_CHECK == yes ]]; then
 			display_alert "You are running on an unsupported system" "${HOSTRELEASE:-(unknown)}" "wrn"
 			display_alert "Do not report any errors, warnings or other issues encountered beyond this point" "" "wrn"
@@ -1065,13 +1088,14 @@ prepare_host()
 # build aarch64
   if [[ $(dpkg --print-architecture) == amd64 ]]; then
 
-	if [[ -z $HOSTRELEASE || $HOSTRELEASE =~ ^(focal|groovy|debbie|buster|bullseye|hirsute|ulyana|ulyssa)$ ]]; then
+	if [[ -z $HOSTRELEASE || $HOSTRELEASE =~ ^(focal|debbie|buster|bullseye|hirsute|ulyana|ulyssa|uma)$ ]]; then
 	    hostdeps="${hostdeps/lib32ncurses5 lib32tinfo5/lib32ncurses6 lib32tinfo6}"
 	fi
 
 	grep -q i386 <(dpkg --print-foreign-architectures) || dpkg --add-architecture i386
+# build aarch64
   fi
-  
+
 	if systemd-detect-virt -q -c; then
 		display_alert "Running in container" "$(systemd-detect-virt)" "info"
 		# disable apt-cacher unless NO_APT_CACHER=no is not specified explicitly
@@ -1087,8 +1111,6 @@ prepare_host()
 		fi
 		SYNC_CLOCK=no
 	fi
-
-# build aarch64
 
 
 	# Skip verification if you are working offline
@@ -1221,7 +1243,7 @@ prepare_host()
 	if [[ ! -f "${USERPATCHES_PATH}"/README ]]; then
 		rm -f "${USERPATCHES_PATH}"/readme.txt
 		echo 'Please read documentation about customizing build configuration' > "${USERPATCHES_PATH}"/README
-		echo 'http://www.armbian.com/using-armbian-tools/' >> "${USERPATCHES_PATH}"/README
+		echo 'https://www.armbian.com/using-armbian-tools/' >> "${USERPATCHES_PATH}"/README
 
 		# create patches directory structure under USERPATCHES_PATH
 		find "${SRC}"/patch -maxdepth 2 -type d ! -name . | sed "s%/.*patch%/$USERPATCHES_PATH%" | xargs mkdir -p
@@ -1443,4 +1465,32 @@ show_developer_warning()
 		--yes-label "I understand and agree" --yesno "$warn_text" "${TTY_Y}" "${TTY_X}"
 	[[ $? -ne 0 ]] && exit_with_error "Error switching to the expert mode"
 	SHOW_WARNING=no
+}
+
+# is a formatted output of the values of variables
+# from the list at the place of the function call.
+#
+# The LOG_OUTPUT_FILE variable must be defined in the calling function
+# before calling the `show_checklist_variables` function and unset after.
+#
+show_checklist_variables ()
+{
+	local checklist=$*
+	local var pval
+	local log_file=${LOG_OUTPUT_FILE:-"${SRC}"/output/debug/trash.log}
+	local _line=${BASH_LINENO[0]}
+	local _function=${FUNCNAME[1]}
+	local _file=$(basename "${BASH_SOURCE[1]}")
+
+	echo -e "Show variables in function: $_function" "[$_file:$_line]\n" >>$log_file
+
+	for var in $checklist;do
+		eval pval=\$$var
+		echo -e "\n$var =:" >>$log_file
+		if [ $(echo "$pval" | gawk -F"/" '{print NF}') -ge 4 ];then
+			printf "%s\n" $pval >>$log_file
+		else
+			printf "%-30s %-30s %-30s %-30s\n" $pval >>$log_file
+		fi
+	done
 }

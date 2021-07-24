@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# Copyright (c) 2015 Igor Pecovnik, igor.pecovnik@gma**.com
+# Copyright (c) 2013-2021 Igor Pecovnik, igor.pecovnik@gma**.com
 #
 # This file is licensed under the terms of the GNU General Public
 # License version 2. This program is licensed "as is" without any
 # warranty of any kind, whether express or implied.
-
+#
 # This file is a part of the Armbian build script
 # https://github.com/armbian/build/
 
@@ -321,18 +321,21 @@ fi
 # Write to variables :
 # - aggregated_content
 aggregate_content() {
-	echo -e "Potential paths : ${potential_paths}" >> "${DEST}"/debug/output.log
+	LOG_OUTPUT_FILE="$SRC/output/debug/potential-paths.log"
+	echo -e "Potential paths :" >> "${LOG_OUTPUT_FILE}"
+	show_checklist_variables potential_paths
 	for filepath in ${potential_paths}; do
 		if [[ -f "${filepath}" ]]; then
-			echo -e "${filepath/"$SRC"\//} yes" >> "${DEST}"/debug/output.log
+			echo -e "${filepath/"$SRC"\//} yes" >> "${LOG_OUTPUT_FILE}"
 			aggregated_content+=$(cat "${filepath}")
 			aggregated_content+="${separator}"
 #		else
-#			echo -e "${filepath/"$SRC"\//} no\n" >> "${DEST}"/debug/output.log
+#			echo -e "${filepath/"$SRC"\//} no\n" >> "${LOG_OUTPUT_FILE}"
 		fi
 
 	done
-	echo "" >> "${DEST}"/debug/output.log
+	echo "" >> "${LOG_OUTPUT_FILE}"
+	unset LOG_OUTPUT_FILE
 }
 
 # set unique mounting directory
@@ -358,7 +361,7 @@ BOOTCONFIG_VAR_NAME=BOOTCONFIG_${BRANCH^^}
 [[ -z $ATFPATCHDIR ]] && ATFPATCHDIR="atf-$LINUXFAMILY"
 [[ -z $KERNELPATCHDIR ]] && KERNELPATCHDIR="$LINUXFAMILY-$BRANCH"
 
-if [[ "$RELEASE" =~ ^(xenial|bionic|focal|groovy|hirsute)$ ]]; then
+if [[ "$RELEASE" =~ ^(xenial|bionic|focal|hirsute|impish)$ ]]; then
 		DISTRIBUTION="Ubuntu"
 	else
 		DISTRIBUTION="Debian"
@@ -373,7 +376,7 @@ fi
 
 AGGREGATION_SEARCH_ROOT_ABSOLUTE_DIRS="
 ${SRC}/config
-${SRC}/config/optional/_any_board/_configs
+${SRC}/config/optional/_any_board/_config
 ${SRC}/config/optional/architectures/${ARCH}/_config
 ${SRC}/config/optional/families/${LINUXFAMILY}/_config
 ${SRC}/config/optional/boards/${BOARD}/_config
@@ -388,6 +391,14 @@ cli/${RELEASE}/debootstrap
 CLI_SEARCH_RELATIVE_DIRS="
 cli/_all_distributions/main
 cli/${RELEASE}/main
+"
+
+PACKAGES_SEARCH_ROOT_ABSOLUTE_DIRS="
+${SRC}/packages
+${SRC}/config/optional/_any_board/_packages
+${SRC}/config/optional/architectures/${ARCH}/_packages
+${SRC}/config/optional/families/${LINUXFAMILY}/_packages
+${SRC}/config/optional/boards/${BOARD}/_packages
 "
 
 DESKTOP_ENVIRONMENTS_SEARCH_RELATIVE_DIRS="
@@ -492,11 +503,8 @@ DEBOOTSTRAP_COMPONENTS="${DEBOOTSTRAP_COMPONENTS// /,}"
 PACKAGE_LIST="$(one_line aggregate_all_cli "packages" " ")"
 PACKAGE_LIST_ADDITIONAL="$(one_line aggregate_all_cli "packages.additional" " ")"
 
-echo "DEBOOTSTRAP_LIST : ${DEBOOTSTRAP_LIST}" >> "${DEST}"/debug/output.log
-echo "DEBOOTSTRAP_COMPONENTS : ${DEBOOTSTRAP_COMPONENTS}" >> "${DEST}"/debug/output.log
-echo "PACKAGE_LIST : ${PACKAGE_LIST}" >> "${DEST}"/debug/output.log
-echo "PACKAGE_LIST_ADDITIONAL : ${PACKAGE_LIST_ADDITIONAL}" >> "${DEST}"/debug/output.log
-echo "PACKAGE_LIST_UNINSTALL : ${PACKAGE_LIST_UNINSTALL}" >> "${DEST}"/debug/output.log
+LOG_OUTPUT_FILE="$SRC/output/debug/debootstrap-list.log"
+show_checklist_variables "DEBOOTSTRAP_LIST DEBOOTSTRAP_COMPONENTS PACKAGE_LIST PACKAGE_LIST_ADDITIONAL PACKAGE_LIST_UNINSTALL"
 
 # Dependent desktop packages
 # Myy : Sources packages from file here
@@ -504,8 +512,10 @@ echo "PACKAGE_LIST_UNINSTALL : ${PACKAGE_LIST_UNINSTALL}" >> "${DEST}"/debug/out
 # Myy : FIXME Rename aggregate_all to aggregate_all_desktop
 if [[ $BUILD_DESKTOP == "yes" ]]; then
 	PACKAGE_LIST_DESKTOP+="$(one_line aggregate_all_desktop "packages" " ")"
-	echo "Groups selected ${DESKTOP_APPGROUPS_SELECTED} -> PACKAGES : ${PACKAGE_LIST_DESKTOP}" >> "${DEST}"/debug/output.log
+	echo -e "\nGroups selected ${DESKTOP_APPGROUPS_SELECTED} -> PACKAGES :" >> "${LOG_OUTPUT_FILE}"
+	show_checklist_variables PACKAGE_LIST_DESKTOP
 fi
+unset LOG_OUTPUT_FILE
 
 DEBIAN_MIRROR='deb.debian.org/debian'
 DEBIAN_SECURTY='security.debian.org/'
@@ -599,11 +609,11 @@ if [[ -n $PACKAGE_LIST_RM ]]; then
 	PACKAGE_MAIN_LIST="$(echo ${PACKAGE_MAIN_LIST})"
 fi
 
-display_alert "Deboostrap components ${DEBOOTSTRAP_COMPONENTS}"
-display_alert "Deboostrap packages ${DEBOOTSTRAP_LIST}"
-display_alert "Packages ${PACKAGE_LIST}"
 
-echo "PACKAGE_MAIN_LIST : ${PACKAGE_MAIN_LIST}" >> "${DEST}"/debug/output.log
+LOG_OUTPUT_FILE="$SRC/output/debug/debootstrap-list.log"
+echo -e "\nVariables after manual configuration" >>$LOG_OUTPUT_FILE
+show_checklist_variables "DEBOOTSTRAP_COMPONENTS DEBOOTSTRAP_LIST PACKAGE_LIST PACKAGE_MAIN_LIST"
+unset LOG_OUTPUT_FILE
 
 # Give the option to configure DNS server used in the chroot during the build process
 [[ -z $NAMESERVER ]] && NAMESERVER="1.0.0.1" # default is cloudflare alternate
