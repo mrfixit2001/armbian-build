@@ -38,7 +38,7 @@ else # rk3308, rk3328
 
 fi
 
-if [[ $BOARD == nanopi-r2s || $BOARD == nanopineo3 || $BOARD == orangepi-r1plus || $BOARD == renegade || $BOARD == rockpi-e || $BOARD == station-m1 || $BOARD == z28pro ]]; then
+if [[ $BOARD == nanopi-r2s || $BOARD == nanopi-r2c || $BOARD == nanopineo3 || $BOARD == orangepi-r1plus || $BOARD == renegade || $BOARD == rockpi-e || $BOARD == station-m1 || $BOARD == z28pro ]]; then
 
 	BOOT_USE_BLOBS=yes
 	BOOT_SOC=rk3328
@@ -51,7 +51,7 @@ elif [[ $BOARD == rk3318-box ]]; then
 	BOOT_USE_MAINLINE_ATF=yes
 	BOOT_SOC=rk3328
 	BOOT_USE_TPL_SPL_BLOB=yes
-	DDR_BLOB='rk33/rk3328_ddr_333MHz_v1.15.bin'
+	DDR_BLOB='rk33/rk3318_ddr_333MHz_v1.16.bin'
 
 elif [[ $BOARD == rock64 ]]; then
 
@@ -171,6 +171,12 @@ prepare_boot_configuration()
 		ATFSOURCE=''
 		ATF_COMPILE='no'
 
+	elif [[ $BOOT_USE_SPL_BLOBS == yes ]]; then
+
+		UBOOT_TARGET_MAP="BL31=$RKBIN_DIR/$BL31_BLOB spl/u-boot-spl.bin u-boot.dtb u-boot.itb;;idbloader.img u-boot.itb"
+		ATFSOURCE=''
+		ATF_COMPILE='no'
+
 	elif [[ $BOOT_USE_BLOBS == yes ]]; then
 
 		UBOOT_TARGET_MAP="u-boot-dtb.bin;;idbloader.bin uboot.img trust.bin"
@@ -227,21 +233,14 @@ uboot_custom_postprocess()
 
 	if [[ $BOOT_USE_MAINLINE_ATF == yes || $BOOT_USE_TPL_SPL_BLOB == yes ]]; then
 
-		if [[ $BOOT_SUPPORT_SPI == yes ]]; then
-
-			tools/mkimage -n rk3399 -T rkspi -d tpl/u-boot-tpl.bin:spl/u-boot-spl.bin rkspi_tpl_spl.img
-			dd if=/dev/zero of=rkspi_loader.img count=8128 status=none
-			dd if=rkspi_tpl_spl.img of=rkspi_loader.img conv=notrunc status=none
-			dd if=u-boot.itb of=rkspi_loader.img seek=768 conv=notrunc status=none
-
-		elif [[ $BOOT_USE_TPL_SPL_BLOB == yes ]]; then
-
-			if [[ -n $DDR_BLOB ]]; then
-				tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB idbloader.img
-				cat spl/u-boot-spl.bin >> idbloader.img
-			fi
-
+		if [[ -n $DDR_BLOB ]]; then
+			tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB idbloader.img
+			cat spl/u-boot-spl.bin >> idbloader.img
 		fi
+
+	elif [[ $BOOT_USE_SPL_BLOBS == yes ]]; then
+
+		tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB:spl/u-boot-spl.bin idbloader.img
 
 	elif [[ $BOOT_USE_BLOBS == yes ]]; then
 
@@ -358,7 +357,7 @@ family_tweaks()
 
 		chroot $SDCARD /bin/bash -c "systemctl --no-reload enable z28pro-bluetooth.service >/dev/null 2>&1"
 
-	elif [[ $BOARD == nanopi-r2s || $BOARD == orangepi-r1plus ]]; then
+	elif [[ $BOARD == nanopi-r2s || $BOARD == nanopi-r2c || $BOARD == orangepi-r1plus ]]; then
 
 		# rename USB based network to lan0
 		mkdir -p $SDCARD/etc/udev/rules.d/
@@ -442,7 +441,7 @@ family_tweaks_bsp()
 		# copy hwmon rules to fix device mapping
 		# changed to only use one file regardless of branch
 		install -m 644 $SRC/packages/bsp/helios64/90-helios64-hwmon.rules $destination/etc/udev/rules.d/
-		
+
 		install -m 644 $SRC/packages/bsp/helios64/fancontrol.service.pid-override $destination/etc/systemd/system/fancontrol.service.d/pid.conf
 
 		# copy fancontrol config
@@ -475,7 +474,7 @@ family_tweaks_bsp()
 		# special keys
 		mkdir -p "${destination}"/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 		cp $SRC/packages/bsp/pinebook-pro/pointers.xml  "${destination}"/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
-		
+
 		# touchpad and keyboard tweaks
 		mkdir -p "${destination}"/etc/X11/xorg.conf.d/
 		# from https://github.com/ayufan-rock64/linux-package/tree/master/root-pinebookpro
