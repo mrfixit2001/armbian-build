@@ -51,7 +51,7 @@ elif [[ $BOARD == rk3318-box ]]; then
 	BOOT_USE_MAINLINE_ATF=yes
 	BOOT_SOC=rk3328
 	BOOT_USE_TPL_SPL_BLOB=yes
-	DDR_BLOB='rk33/rk3318_ddr_333MHz_v1.16.bin'
+	DDR_BLOB='rk33/rk3318_ddr_333Mhz_v1.16.bin'
 
 elif [[ $BOARD == rock64 ]]; then
 
