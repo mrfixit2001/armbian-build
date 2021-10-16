@@ -20,6 +20,11 @@ enable the alternative SDIO bus. You need to complete the \
 configuration, reboot the box and run again ${COLOR_RED}`basename $0`${COLOR_BLACK} to probe the other \
 bus."
 
+NOTE_BOARD_SELECTION="${COLOR_RED}Important:${COLOR_BLACK} select the \
+board configuration looking on the markings of the board.\nThe right \
+configuration solve problems with devices detection like leds,\n\
+wifi, bluetooth and improve general stability\n\n"
+
 EFUSE_PATH="/sys/bus/nvmem/devices/rockchip-efuse0/nvmem"
 SDIO_WIFI_PATH="/sys/bus/sdio/devices/mmc1:0001:1"
 SDIO2_WIFI_PATH="/sys/bus/sdio/devices/mmc3:0001:1"
@@ -64,8 +69,10 @@ WIFI_CHIPS+=(["02d0:4330"]="")
 DT_EMMC_OVERLAYS+=(["rk3318-box-emmc-ddr"]="enable eMMC DDR Mode")
 DT_EMMC_OVERLAYS+=(["rk3318-box-emmc-hs200"]="enable eMMC HS200 Mode")
 
-DT_LED_OVERLAYS+=(["rk3318-box-led-conf1"]="LED configuration #1 (YX_RK3328)")
-DT_LED_OVERLAYS+=(["rk3318-box-led-conf2"]="LED configuration #2 (X88_PRO_B)")
+DT_LED_OVERLAYS+=(["n/a"]="Generic/unlisted")
+DT_LED_OVERLAYS+=(["rk3318-box-led-conf1"]="YX_RK3328 boards")
+DT_LED_OVERLAYS+=(["rk3318-box-led-conf2"]="X88_PRO_B boards")
+DT_LED_OVERLAYS+=(["rk3318-box-led-conf3"]="MXQ-RK3328-D4 boards (w/ RK805)")
 
 DT_CPU_OVERLAYS+=(["rk3318-box-cpu-hs"]="RK3318 or RK3328")
 
@@ -351,7 +358,7 @@ function select_led_configuration() {
         DIALOG_ENTRIES+=($KEY "${DT_LED_OVERLAYS[$KEY]}")
     done
 
-    MENU_TITLE="${BOARD_INFO}Select the led/gpio wiring configuation:\n"
+    MENU_TITLE="${BOARD_INFO}${NOTE_BOARD_SELECTION}"
 
     MENU_CMD=(dialog --colors --backtitle "$BACKTITLE" --title "$TITLE" --menu "$MENU_TITLE" 24 0 20)
 
@@ -368,6 +375,8 @@ function select_led_configuration() {
         echo "dialog utility returned an unexpected error code: $RET"
         return 1
     fi
+
+    [[ "$SELECTION" = "n/a" ]] && SELECTION=""
 
     echo $SELECTION
     

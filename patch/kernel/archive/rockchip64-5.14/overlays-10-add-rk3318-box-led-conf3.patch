@@ -1,0 +1,426 @@
+From ea5c061456cbab6b73ee4b3902f9af7707a1cc34 Mon Sep 17 00:00:00 2001
+From: Paolo Sabatino <paolo.sabatino@gmail.com>
+Date: Fri, 15 Oct 2021 20:40:48 +0000
+Subject: [PATCH] rk3318-box: add led-conf3 for MXQ-RK3328-D4_A boards
+
+---
+ arch/arm64/boot/dts/rockchip/overlay/Makefile |   1 +
+ .../rockchip/overlay/README.rockchip-overlays |   7 +
+ .../dts/rockchip/overlay/rockchip-fixup.scr   | Bin 0 -> 2698 bytes
+ .../overlay/rockchip-rk3318-box-led-conf3.dts | 349 ++++++++++++++++++
+ 4 files changed, 357 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/rockchip/overlay/rockchip-fixup.scr
+ create mode 100644 arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts
+
+diff --git a/arch/arm64/boot/dts/rockchip/overlay/Makefile b/arch/arm64/boot/dts/rockchip/overlay/Makefile
+index c28c7a5eb..f11aa6d57 100644
+--- a/arch/arm64/boot/dts/rockchip/overlay/Makefile
++++ b/arch/arm64/boot/dts/rockchip/overlay/Makefile
+@@ -13,6 +13,7 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
+ 	rockchip-w1-gpio.dtbo \
+ 	rockchip-rk3318-box-led-conf1.dtbo \
+ 	rockchip-rk3318-box-led-conf2.dtbo \
++	rockchip-rk3318-box-led-conf3.dtbo \
+ 	rockchip-rk3318-box-emmc-ddr.dtbo \
+ 	rockchip-rk3318-box-wlan-ap6334.dtbo \
+ 	rockchip-rk3318-box-wlan-ext.dtbo \
+diff --git a/arch/arm64/boot/dts/rockchip/overlay/README.rockchip-overlays b/arch/arm64/boot/dts/rockchip/overlay/README.rockchip-overlays
+index 4172bd731..27f945d38 100644
+--- a/arch/arm64/boot/dts/rockchip/overlay/README.rockchip-overlays
++++ b/arch/arm64/boot/dts/rockchip/overlay/README.rockchip-overlays
+@@ -129,6 +129,13 @@ YX_RK3328 and clones
+ Activates led/gpio configuration for rk3318 tv box boards withs signature
+ X88_PRO_B and clones
+
++### rk3318-box-led-conf3
++
++This device tree overlay is suitable for MXQ-RK3328-D4_A board which
++has an integrated PMIC (RK805). The dtbo is very important to achieve
++1.3 Ghz speed for CPU and stable voltages for other parts of the
++system. Also enables gpio leds and keys.
++
+ ### rk3318-box-emmc-ddr
+
+ Activates eMMC DDR capability for rk3318 tv box boards. Probably all the eMMC chips
+diff --git a/arch/arm64/boot/dts/rockchip/overlay/rockchip-fixup.scr b/arch/arm64/boot/dts/rockchip/overlay/rockchip-fixup.scr
+new file mode 100644
+index 0000000000000000000000000000000000000000..794d4ce147ea7b63a3b5fdb22597d441ebe6b54b
+GIT binary patch
+literal 2698
+zcmcguOK;Oa5bmW&@qr_V+sH+2Lu=J(IUoh9Qjic_K&r$klC^Qx$*O*_yG|34{2qP{
+z;><7M%8c!GUQTLM314ilzxn3jZ)f&s|Jm2aKSn>9`2A~d&-%1iUQbW|-0VMjWL|gN
+zt!w&t0LhrkkWCc?Vv?nxd?`|G9e{|^kVib$3XT&AlIanbpt8QwLT8$*wlM`JhgpFP
+zve?%miCHN06iG5A;vr;CKS^{+jSHv1<FSxQOhzzfQm}r=6|i^!b}-O3_(>Gun`J4k
+z5eoy3D`}#*mx>sUXmyfG&{0YYzLp_H2KI+9A3q<vv(D^%b}@U|_IkaWUT<(>gWc<O
+z>~2nH4Erp;U05N^J4SeW1&?WJu%CY?M}(i-@CNL+HXI&88JhV7Zr7@ZU)RDr+u-kN
+z;pf}n?`z=~tGQCussd4}m?>sEIB9P$%~ICz0$yzrE(1=Wctc0?Bg?Wx0C_Q-n97$j
+z$s$kT$3)W2>t||icL608TP;(ydK4AhUC)s?QdA_^_;eKn9pA;vZo<{Mmut|N>-=6W
+z-k9s+Uap|z!W}~5gR`RKrWSKhn(0h|o!qi1)?yp(3@w6?snM0YZnERIMQq{)l7CzL
+zw`LAf;h?EQrWud@DcG;q1W_?xQqaO`nJDU%<D+m$61ba7`7{bc@*z6z7!O5H39*gj
+zJ;apILhsw8JK*C6(p^D4P`Vpj50LH#*8`-x!S#Qoi|!lBmIAHB)l4rr`EJRsuo^+t
+zNtS@5tbdd&g;2@0o9~Eivb^ii_*?AArICc|`B<#>kilB5B~(5GcSDe9(ZUxbGK*KI
+zvei1^{wUeNg5x-sV8VH`m=hG<9C!RKvphayQw-qU1{AHq<1_J78ysT09J4Shwz~=D
+z%=6SV>L;P{yw)%kNj1ar*miqbK6@;AG+EVn9pQ;4<ZA_hv{-K7thBG374Ig+d?F+<
+wzY~&UW2ba*6kxB-11+)OPH2d@Zk6dATyROnYc0{#s5;)1`4(rcGG@}{U(McuO#lD@
+
+literal 0
+HcmV?d00001
+
+diff --git a/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts b/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts
+new file mode 100644
+index 000000000..67540cce0
+--- /dev/null
++++ b/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts
+@@ -0,0 +1,349 @@
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++
++/ {
++
++	fragment@0 {
++		target = <&vdd_arm>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@1 {
++		target = <&vdd_logic>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@2 {
++		target = <&xin32k>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@3 {
++		target = <&i2c1>;
++		__overlay__ {
++
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			clock-frequency = <1000000>;
++			i2c-scl-rising-time-ns = <83>;
++			i2c-scl-falling-time-ns = <5>;
++			status = "okay";
++
++			rk805: rk805@18 {
++				compatible = "rockchip,rk805";
++				reg = <0x18>;
++				status = "okay";
++
++				gpio-controller;
++				#gpio-cells = <2>;
++
++				interrupt-parent = <&gpio2>;
++				interrupts = <RK_PA6 IRQ_TYPE_LEVEL_LOW>;
++
++				pinctrl-names = "default";
++				pinctrl-0 = <&pmic_int_l>;
++
++				rockchip,system-power-controller;
++				wakeup-source;
++
++				#clock-cells = <1>;
++				clock-output-names = "xin32k", "rk805-clkout2";
++
++				vcc1-supply = <&vcc_sys>;
++				vcc2-supply = <&vcc_sys>;
++				vcc3-supply = <&vcc_sys>;
++				vcc4-supply = <&vcc_sys>;
++				vcc5-supply = <&vcc_io>;
++				vcc6-supply = <&vcc_io>;
++
++				rtc {
++					status = "okay";
++				};
++
++				pwrkey {
++					status = "okay";
++				};
++
++				gpio {
++					status = "okay";
++				};
++
++				regulators {
++					compatible = "rk805-regulator";
++					status = "okay";
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					vdd_logic_rk805: DCDC_REG1 {
++						regulator-name = "vdd_logic";
++						regulator-min-microvolt = <700000>;
++						regulator-max-microvolt = <1350000>;
++						regulator-ramp-delay = <12500>;
++						regulator-boot-on;
++						regulator-always-on;
++						regulator-state-mem {
++							regulator-on-in-suspend;
++							regulator-suspend-microvolt = <1000000>;
++						};
++					};
++
++					vdd_arm_rk805: DCDC_REG2 {
++						regulator-name = "vdd_arm";
++						regulator-min-microvolt = <700000>;
++						regulator-max-microvolt = <1350000>;
++						regulator-ramp-delay = <12500>;
++						regulator-boot-on;
++						regulator-always-on;
++						regulator-state-mem {
++							regulator-on-in-suspend;
++							regulator-suspend-microvolt = <950000>;
++						};
++					};
++
++					vcc_ddr: DCDC_REG3 {
++						regulator-name = "vcc_ddr";
++						regulator-min-microvolt = <1200000>;
++						regulator-max-microvolt = <1200000>;
++						regulator-boot-on;
++						regulator-always-on;
++						regulator-state-mem {
++							regulator-on-in-suspend;
++						};
++					};
++
++					vcc_io_rk805: DCDC_REG4 {
++						regulator-name = "vcc_io";
++						regulator-min-microvolt = <3300000>;
++						regulator-max-microvolt = <3300000>;
++						regulator-boot-on;
++						regulator-always-on;
++						regulator-state-mem {
++							regulator-on-in-suspend;
++							regulator-suspend-microvolt = <3300000>;
++						};
++					};
++
++					vdd_18_rk805: LDO_REG1 {
++						regulator-name = "vdd_18";
++						regulator-min-microvolt = <1800000>;
++						regulator-max-microvolt = <1800000>;
++						regulator-boot-on;
++						regulator-always-on;
++						regulator-state-mem {
++							regulator-on-in-suspend;
++							regulator-suspend-microvolt = <1800000>;
++						};
++					};
++
++					vcc_18emmc: LDO_REG2 {
++						regulator-name = "vcc_18emmc";
++						regulator-min-microvolt = <1800000>;
++						regulator-max-microvolt = <1800000>;
++						regulator-boot-on;
++						regulator-always-on;
++						regulator-state-mem {
++							regulator-on-in-suspend;
++							regulator-suspend-microvolt = <1800000>;
++						};
++					};
++
++					vdd_11: LDO_REG3 {
++						regulator-name = "vdd_11";
++						regulator-min-microvolt = <1100000>;
++						regulator-max-microvolt = <1100000>;
++						regulator-boot-on;
++						regulator-always-on;
++						regulator-state-mem {
++							regulator-on-in-suspend;
++							regulator-suspend-microvolt = <1100000>;
++						};
++					};
++				};
++			};
++
++		};
++	};
++
++	fragment@4 {
++		target = <&pinctrl>;
++		__overlay__ {
++			ir_led: ir-led {
++				rockchip,pins = <2 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
++			};
++		};
++	};
++
++	fragment@5 {
++		target = <&gpio_led>;
++		__overlay__ {
++
++			pinctrl-names = "default";
++			pinctrl-0 = <&ir_led>;
++
++			working {
++				gpios = <&rk805 1 GPIO_ACTIVE_LOW>;
++				default-state = "on";
++				linux,default-trigger = "mmc2";
++				mode = <35>;
++			};
++
++			net {
++				gpios = <&rk805 0 GPIO_ACTIVE_LOW>;
++				linux,default-trigger = "eth0";
++				default-state = "off";
++				mode = <5>;
++			};
++
++			ir {
++				gpios = <&gpio2 RK_PC2 GPIO_ACTIVE_LOW>;
++				linux,default-trigger = "ir";
++				default-state = "off";
++				mode = <0>;
++			};
++
++		};
++	};
++
++
++	fragment@6 {
++		target = <&io_domains>;
++		__overlay__ {
++			vccio1-supply = <&vcc_io_rk805>;
++			vccio2-supply = <&vcc_18emmc>;
++			vccio3-supply = <&vcc_io_rk805>;
++			vccio4-supply = <&vdd_18_rk805>;
++			vccio5-supply = <&vcc_io_rk805>;
++			vccio6-supply = <&vcc_io_rk805>;
++			pmuio-supply = <&vcc_io_rk805>;
++		};
++	};
++
++	fragment@7 {
++		target-path = "/";
++		__overlay__ {
++			gpio_keys: gpio-keys {
++				compatible = "gpio-keys";
++
++				power {
++					label = "Power button";
++					linux,code = <KEY_POWER>;
++					gpios = <&gpio2 RK_PC5 GPIO_ACTIVE_HIGH>;
++				};
++
++			};
++		};
++
++	};
++
++	fragment@8 {
++		target = <&dmc>;
++		__overlay__ {
++			center-supply = <&vdd_logic_rk805>;
++		};
++	};
++
++	fragment@9 {
++		target = <&gpu>;
++		__overlay__ {
++			mali-supply = <&vdd_logic_rk805>;
++		};
++	};
++
++	fragment@10 {
++		target = <&vpu>;
++		__overlay__ {
++			vcodec-supply = <&vdd_logic_rk805>;
++		};
++	};
++
++	fragmet@11 {
++		target = <&cpu0>;
++		__overlay__ {
++			cpu-supply = <&vdd_arm_rk805>;
++		};
++	};
++
++	fragment@12 {
++		target = <&cpu1>;
++		__overlay__ {
++			cpu-supply = <&vdd_arm_rk805>;
++		};
++	};
++
++	fragment@13 {
++		target = <&cpu2>;
++		__overlay__ {
++			cpu-supply = <&vdd_arm_rk805>;
++		};
++	};
++
++	fragment@14 {
++		target = <&cpu3>;
++		__overlay__ {
++			cpu-supply = <&vdd_arm_rk805>;
++		};
++	};
++
++	fragment@15 {
++		target = <&vcc_sd>;
++		__overlay__ {
++			vin-supply = <&vcc_io_rk805>;
++		};
++	};
++
++	fragment@16 {
++		target = <&emmc>;
++		__overlay__ {
++			vmmc-supply = <&vcc_io_rk805>;
++			vqmmc-supply = <&vcc_18emmc>;
++		};
++	};
++
++	fragment@17 {
++		target = <&saradc>;
++		__overlay__ {
++			vref-supply = <&vdd_18_rk805>;
++		};
++	};
++
++	fragment@18 {
++		target = <&vcc_io>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@19 {
++		target = <&vcc_18>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@20 {
++		target = <&pwm0>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@21 {
++		target = <&pwm1>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++};
+--
+2.30.2
+
