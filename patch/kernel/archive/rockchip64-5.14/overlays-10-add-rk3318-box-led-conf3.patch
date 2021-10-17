@@ -6,7 +6,6 @@ Subject: [PATCH] rk3318-box: add led-conf3 for MXQ-RK3328-D4_A boards
 ---
  arch/arm64/boot/dts/rockchip/overlay/Makefile |   1 +
  .../rockchip/overlay/README.rockchip-overlays |   7 +
- .../dts/rockchip/overlay/rockchip-fixup.scr   | Bin 0 -> 2698 bytes
  .../overlay/rockchip-rk3318-box-led-conf3.dts | 349 ++++++++++++++++++
  4 files changed, 357 insertions(+)
  create mode 100644 arch/arm64/boot/dts/rockchip/overlay/rockchip-fixup.scr
@@ -42,30 +41,6 @@ index 4172bd731..27f945d38 100644
  ### rk3318-box-emmc-ddr
 
  Activates eMMC DDR capability for rk3318 tv box boards. Probably all the eMMC chips
-diff --git a/arch/arm64/boot/dts/rockchip/overlay/rockchip-fixup.scr b/arch/arm64/boot/dts/rockchip/overlay/rockchip-fixup.scr
-new file mode 100644
-index 0000000000000000000000000000000000000000..794d4ce147ea7b63a3b5fdb22597d441ebe6b54b
-GIT binary patch
-literal 2698
-zcmcguOK;Oa5bmW&@qr_V+sH+2Lu=J(IUoh9Qjic_K&r$klC^Qx$*O*_yG|34{2qP{
-z;><7M%8c!GUQTLM314ilzxn3jZ)f&s|Jm2aKSn>9`2A~d&-%1iUQbW|-0VMjWL|gN
-zt!w&t0LhrkkWCc?Vv?nxd?`|G9e{|^kVib$3XT&AlIanbpt8QwLT8$*wlM`JhgpFP
-zve?%miCHN06iG5A;vr;CKS^{+jSHv1<FSxQOhzzfQm}r=6|i^!b}-O3_(>Gun`J4k
-z5eoy3D`}#*mx>sUXmyfG&{0YYzLp_H2KI+9A3q<vv(D^%b}@U|_IkaWUT<(>gWc<O
-z>~2nH4Erp;U05N^J4SeW1&?WJu%CY?M}(i-@CNL+HXI&88JhV7Zr7@ZU)RDr+u-kN
-z;pf}n?`z=~tGQCussd4}m?>sEIB9P$%~ICz0$yzrE(1=Wctc0?Bg?Wx0C_Q-n97$j
-z$s$kT$3)W2>t||icL608TP;(ydK4AhUC)s?QdA_^_;eKn9pA;vZo<{Mmut|N>-=6W
-z-k9s+Uap|z!W}~5gR`RKrWSKhn(0h|o!qi1)?yp(3@w6?snM0YZnERIMQq{)l7CzL
-zw`LAf;h?EQrWud@DcG;q1W_?xQqaO`nJDU%<D+m$61ba7`7{bc@*z6z7!O5H39*gj
-zJ;apILhsw8JK*C6(p^D4P`Vpj50LH#*8`-x!S#Qoi|!lBmIAHB)l4rr`EJRsuo^+t
-zNtS@5tbdd&g;2@0o9~Eivb^ii_*?AArICc|`B<#>kilB5B~(5GcSDe9(ZUxbGK*KI
-zvei1^{wUeNg5x-sV8VH`m=hG<9C!RKvphayQw-qU1{AHq<1_J78ysT09J4Shwz~=D
-z%=6SV>L;P{yw)%kNj1ar*miqbK6@;AG+EVn9pQ;4<ZA_hv{-K7thBG374Ig+d?F+<
-wzY~&UW2ba*6kxB-11+)OPH2d@Zk6dATyROnYc0{#s5;)1`4(rcGG@}{U(McuO#lD@
-
-literal 0
-HcmV?d00001
-
 diff --git a/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts b/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts
 new file mode 100644
 index 000000000..67540cce0
