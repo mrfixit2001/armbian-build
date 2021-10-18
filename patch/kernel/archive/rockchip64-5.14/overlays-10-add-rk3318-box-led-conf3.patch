@@ -1,13 +1,14 @@
-From a5f2f12a96ea5358436b184c0575d1f0676a1d87 Mon Sep 17 00:00:00 2001
+From 506d63cda173ca0f992bdbf4b4d2f3e1e20f905c Mon Sep 17 00:00:00 2001
 From: Paolo Sabatino <paolo.sabatino@gmail.com>
-Date: Sun, 17 Oct 2021 14:51:18 +0000
-Subject: [PATCH] rk3318-box: rework MXQ-RK3328-D4 board config
+Date: Mon, 18 Oct 2021 18:30:28 +0000
+Subject: [PATCH] rk3318-box: add led-conf3 to support MXQ-RK3328-D4 boards
+ with RK805 PMIC
 
 ---
  arch/arm64/boot/dts/rockchip/overlay/Makefile |   1 +
  .../rockchip/overlay/README.rockchip-overlays |   7 +
- .../overlay/rockchip-rk3318-box-led-conf3.dts | 284 ++++++++++++++++++
- 3 files changed, 292 insertions(+)
+ .../overlay/rockchip-rk3318-box-led-conf3.dts | 279 ++++++++++++++++++
+ 3 files changed, 287 insertions(+)
  create mode 100644 arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts
 
 diff --git a/arch/arm64/boot/dts/rockchip/overlay/Makefile b/arch/arm64/boot/dts/rockchip/overlay/Makefile
@@ -42,10 +43,10 @@ index 4172bd731..27f945d38 100644
  Activates eMMC DDR capability for rk3318 tv box boards. Probably all the eMMC chips
 diff --git a/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts b/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts
 new file mode 100644
-index 000000000..c96398ce6
+index 000000000..4641f7588
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3318-box-led-conf3.dts
-@@ -0,0 +1,284 @@
+@@ -0,0 +1,279 @@
 +/dts-v1/;
 +/plugin/;
 +
@@ -156,8 +157,6 @@ index 000000000..c96398ce6
 +
 +			vcc_ddr: DCDC_REG3 {
 +				regulator-name = "vcc_ddr";
-+				regulator-min-microvolt = <1200000>;
-+				regulator-max-microvolt = <1200000>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +				regulator-state-mem {
@@ -307,15 +306,12 @@ index 000000000..c96398ce6
 +
 +
 +&vcc_sd {
-+	//vin-supply = <&vcc_io>;
-+	vin-supply = <>;
++	vin-supply = <&vcc_io>;
 +};
 +
 +&emmc {
-+	// vmmc-supply = <&vcc_io>;
-+	// vqmmc-supply = <&vcc_18emmc>;
-+	vmmc-supply = <>;
-+	vqmmc-supply = <>;
++	vmmc-supply = <&vcc_io>;
++	vqmmc-supply = <&vcc_18emmc>;
 +};
 +
 +&saradc {
