@@ -284,7 +284,7 @@ index 000000000..c81079ef8
 +&dmc {
 +	center-supply = <&vdd_logic>;
 +	ddr_timing = <&ddr_timing>;
-+	status = "okay";
++	status = "disabled";
 +};
 +
 +&codec {
