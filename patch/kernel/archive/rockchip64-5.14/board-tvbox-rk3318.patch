@@ -668,7 +668,7 @@ index 000000000..c81079ef8
 +};
 diff --git a/arch/arm64/boot/dts/rockchip/rk3318-dram-default-timing.dtsi b/arch/arm64/boot/dts/rockchip/rk3318-dram-default-timing.dtsi
 new file mode 100644
-index 000000000..2a81c1e63
+index 000000000..31a28d829
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3318-dram-default-timing.dtsi
 @@ -0,0 +1,311 @@
@@ -793,8 +793,8 @@ index 000000000..2a81c1e63
 +		ddr3ba2_ddr4ba0_de-skew = <3>;
 +		ddr3we_ddr4bg1_de-skew = <2>;
 +		ddr3cas_ddr4a12_de-skew = <2>;
-+		ddr3ckn_ddr4ckn_de-skew = <12>;
-+		ddr3ckp_ddr4ckp_de-skew = <12>;
++		ddr3ckn_ddr4ckn_de-skew = <11>;
++		ddr3ckp_ddr4ckp_de-skew = <11>;
 +		ddr3cke_ddr4a16_de-skew = <2>;
 +		ddr3odt0_ddr4a14_de-skew = <4>;
 +		ddr3cs0_ddr4act_de-skew = <4>;
@@ -806,76 +806,76 @@ index 000000000..2a81c1e63
 +		 * RX one step is 25.1ps, range 0-15
 +		 * TX one step is 47.8ps, range 0-15
 +		 */
-+		cs0_dm0_rx_de-skew = <7>;
-+		cs0_dm0_tx_de-skew = <8>;
-+		cs0_dq0_rx_de-skew = <7>;
-+		cs0_dq0_tx_de-skew = <8>;
-+		cs0_dq1_rx_de-skew = <7>;
-+		cs0_dq1_tx_de-skew = <8>;
-+		cs0_dq2_rx_de-skew = <7>;
-+		cs0_dq2_tx_de-skew = <8>;
-+		cs0_dq3_rx_de-skew = <7>;
-+		cs0_dq3_tx_de-skew = <8>;
-+		cs0_dq4_rx_de-skew = <7>;
-+		cs0_dq4_tx_de-skew = <8>;
-+		cs0_dq5_rx_de-skew = <7>;
-+		cs0_dq5_tx_de-skew = <8>;
-+		cs0_dq6_rx_de-skew = <7>;
-+		cs0_dq6_tx_de-skew = <8>;
-+		cs0_dq7_rx_de-skew = <7>;
-+		cs0_dq7_tx_de-skew = <8>;
-+		cs0_dqs0_rx_de-skew = <6>;
-+		cs0_dqs0p_tx_de-skew = <9>;
-+		cs0_dqs0n_tx_de-skew = <9>;
++		cs0_dm0_rx_de-skew = <12>;
++		cs0_dm0_tx_de-skew = <10>;
++		cs0_dq0_rx_de-skew = <12>;
++		cs0_dq0_tx_de-skew = <10>;
++		cs0_dq1_rx_de-skew = <12>;
++		cs0_dq1_tx_de-skew = <10>;
++		cs0_dq2_rx_de-skew = <12>;
++		cs0_dq2_tx_de-skew = <10>;
++		cs0_dq3_rx_de-skew = <12>;
++		cs0_dq3_tx_de-skew = <10>;
++		cs0_dq4_rx_de-skew = <12>;
++		cs0_dq4_tx_de-skew = <10>;
++		cs0_dq5_rx_de-skew = <12>;
++		cs0_dq5_tx_de-skew = <10>;
++		cs0_dq6_rx_de-skew = <12>;
++		cs0_dq6_tx_de-skew = <10>;
++		cs0_dq7_rx_de-skew = <12>;
++		cs0_dq7_tx_de-skew = <10>;
++		cs0_dqs0_rx_de-skew = <10>;
++		cs0_dqs0p_tx_de-skew = <12>;
++		cs0_dqs0n_tx_de-skew = <12>;
 +
-+		cs0_dm1_rx_de-skew = <7>;
-+		cs0_dm1_tx_de-skew = <7>;
-+		cs0_dq8_rx_de-skew = <7>;
++		cs0_dm1_rx_de-skew = <10>;
++		cs0_dm1_tx_de-skew = <8>;
++		cs0_dq8_rx_de-skew = <10>;
 +		cs0_dq8_tx_de-skew = <8>;
-+		cs0_dq9_rx_de-skew = <7>;
-+		cs0_dq9_tx_de-skew = <7>;
-+		cs0_dq10_rx_de-skew = <7>;
++		cs0_dq9_rx_de-skew = <10>;
++		cs0_dq9_tx_de-skew = <8>;
++		cs0_dq10_rx_de-skew = <10>;
 +		cs0_dq10_tx_de-skew = <8>;
-+		cs0_dq11_rx_de-skew = <7>;
-+		cs0_dq11_tx_de-skew = <7>;
-+		cs0_dq12_rx_de-skew = <7>;
++		cs0_dq11_rx_de-skew = <10>;
++		cs0_dq11_tx_de-skew = <8>;
++		cs0_dq12_rx_de-skew = <10>;
 +		cs0_dq12_tx_de-skew = <8>;
-+		cs0_dq13_rx_de-skew = <7>;
-+		cs0_dq13_tx_de-skew = <7>;
-+		cs0_dq14_rx_de-skew = <7>;
++		cs0_dq13_rx_de-skew = <10>;
++		cs0_dq13_tx_de-skew = <8>;
++		cs0_dq14_rx_de-skew = <10>;
 +		cs0_dq14_tx_de-skew = <8>;
-+		cs0_dq15_rx_de-skew = <7>;
-+		cs0_dq15_tx_de-skew = <7>;
-+		cs0_dqs1_rx_de-skew = <7>;
-+		cs0_dqs1p_tx_de-skew = <9>;
-+		cs0_dqs1n_tx_de-skew = <9>;
++		cs0_dq15_rx_de-skew = <10>;
++		cs0_dq15_tx_de-skew = <8>;
++		cs0_dqs1_rx_de-skew = <9>;
++		cs0_dqs1p_tx_de-skew = <10>;
++		cs0_dqs1n_tx_de-skew = <10>;
 +
-+		cs0_dm2_rx_de-skew = <7>;
-+		cs0_dm2_tx_de-skew = <8>;
-+		cs0_dq16_rx_de-skew = <7>;
-+		cs0_dq16_tx_de-skew = <8>;
-+		cs0_dq17_rx_de-skew = <7>;
-+		cs0_dq17_tx_de-skew = <8>;
-+		cs0_dq18_rx_de-skew = <7>;
-+		cs0_dq18_tx_de-skew = <8>;
-+		cs0_dq19_rx_de-skew = <7>;
-+		cs0_dq19_tx_de-skew = <8>;
-+		cs0_dq20_rx_de-skew = <7>;
-+		cs0_dq20_tx_de-skew = <8>;
-+		cs0_dq21_rx_de-skew = <7>;
-+		cs0_dq21_tx_de-skew = <8>;
-+		cs0_dq22_rx_de-skew = <7>;
-+		cs0_dq22_tx_de-skew = <8>;
-+		cs0_dq23_rx_de-skew = <7>;
-+		cs0_dq23_tx_de-skew = <8>;
-+		cs0_dqs2_rx_de-skew = <6>;
-+		cs0_dqs2p_tx_de-skew = <9>;
-+		cs0_dqs2n_tx_de-skew = <9>;
++		cs0_dm2_rx_de-skew = <10>;
++		cs0_dm2_tx_de-skew = <9>;
++		cs0_dq16_rx_de-skew = <10>;
++		cs0_dq16_tx_de-skew = <9>;
++		cs0_dq17_rx_de-skew = <10>;
++		cs0_dq17_tx_de-skew = <9>;
++		cs0_dq18_rx_de-skew = <10>;
++		cs0_dq18_tx_de-skew = <9>;
++		cs0_dq19_rx_de-skew = <10>;
++		cs0_dq19_tx_de-skew = <9>;
++		cs0_dq20_rx_de-skew = <10>;
++		cs0_dq20_tx_de-skew = <9>;
++		cs0_dq21_rx_de-skew = <10>;
++		cs0_dq21_tx_de-skew = <9>;
++		cs0_dq22_rx_de-skew = <10>;
++		cs0_dq22_tx_de-skew = <9>;
++		cs0_dq23_rx_de-skew = <10>;
++		cs0_dq23_tx_de-skew = <9>;
++		cs0_dqs2_rx_de-skew = <9>;
++		cs0_dqs2p_tx_de-skew = <11>;
++		cs0_dqs2n_tx_de-skew = <11>;
 +
 +		cs0_dm3_rx_de-skew = <7>;
 +		cs0_dm3_tx_de-skew = <7>;
 +		cs0_dq24_rx_de-skew = <7>;
-+		cs0_dq24_tx_de-skew = <8>;
++		cs0_dq24_tx_de-skew = <7>;
 +		cs0_dq25_rx_de-skew = <7>;
 +		cs0_dq25_tx_de-skew = <7>;
 +		cs0_dq26_rx_de-skew = <7>;
@@ -891,8 +891,8 @@ index 000000000..2a81c1e63
 +		cs0_dq31_rx_de-skew = <7>;
 +		cs0_dq31_tx_de-skew = <7>;
 +		cs0_dqs3_rx_de-skew = <7>;
-+		cs0_dqs3p_tx_de-skew = <9>;
-+		cs0_dqs3n_tx_de-skew = <9>;
++		cs0_dqs3p_tx_de-skew = <10>;
++		cs0_dqs3n_tx_de-skew = <10>;
 +
 +		cs1_dm0_rx_de-skew = <7>;
 +		cs1_dm0_tx_de-skew = <8>;
